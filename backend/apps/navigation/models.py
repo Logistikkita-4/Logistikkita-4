@@ -1,6 +1,15 @@
+"""
+Models untuk aplikasi Navigation.
+File location: backend/apps/navigation/models.py
+"""
+
 from django.db import models
 from django.core.validators import URLValidator
+from django.contrib.auth import get_user_model  # Tambah ini
 import json
+
+# Get user model untuk foreign key
+User = get_user_model()
 
 class NavigationMenu(models.Model):
     """
@@ -25,16 +34,26 @@ class NavigationMenu(models.Model):
         verbose_name = 'Navigation Menu'
         verbose_name_plural = 'Navigation Menus'
         ordering = ['location', 'name']
+        indexes = [
+            models.Index(fields=['location', 'is_active']),
+        ]
     
     def __str__(self):
         return f"{self.name} ({self.get_location_display()})"
+    
+    def get_active_items(self):
+        """Get semua active items untuk menu ini."""
+        return self.items.filter(is_active=True).order_by('order_index')
+
 
 class MenuItem(models.Model):
     """
     Model untuk item menu individual.
     Mendukung nested/hierarchical structure dengan parent-child relationship.
     """
-    menu = models.ForeignKey(NavigationMenu, on_delete=models.CASCADE, related_name='items')
+    menu = models.ForeignKey(NavigationMenu, on_delete=models.CASCADE, 
+                            related_name='items', null=True, blank=True)  # Tambah null=True
+    
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, 
                               related_name='children')
     
@@ -81,7 +100,7 @@ class MenuItem(models.Model):
     @property
     def has_children(self):
         """Cek apakah menu item punya submenu."""
-        return self.children.exists()
+        return self.children.filter(is_active=True).exists()
     
     @property
     def full_url(self):
@@ -89,6 +108,19 @@ class MenuItem(models.Model):
         if self.is_external and not self.url.startswith(('http://', 'https://')):
             return f"https://{self.url}"
         return self.url
+    
+    def get_descendants(self, include_self=False):
+        """Get semua descendants item ini."""
+        descendants = []
+        if include_self:
+            descendants.append(self)
+        
+        for child in self.children.filter(is_active=True).order_by('order_index'):
+            descendants.append(child)
+            descendants.extend(child.get_descendants())
+        
+        return descendants
+
 
 class SiteSetting(models.Model):
     """
@@ -120,7 +152,7 @@ class SiteSetting(models.Model):
     
     setting_key = models.CharField(max_length=100, unique=True, 
                                   help_text="Key unik untuk setting (contoh: site_name, primary_color)")
-    setting_value = models.TextField(help_text="Value dari setting")
+    setting_value = models.TextField(help_text="Value dari setting", default="")
     setting_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='string')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
     
@@ -145,13 +177,16 @@ class SiteSetting(models.Model):
     
     def get_value(self):
         """Parse value berdasarkan type."""
+        if not self.setting_value:
+            return ""
+            
         if self.setting_type == 'json':
             try:
                 return json.loads(self.setting_value)
             except json.JSONDecodeError:
                 return self.setting_value
         elif self.setting_type == 'boolean':
-            return self.setting_value.lower() in ('true', '1', 'yes', 'on')
+            return self.setting_value.lower() in ('true', '1', 'yes', 'on', 't')
         elif self.setting_type == 'number':
             try:
                 if '.' in self.setting_value:
@@ -159,8 +194,20 @@ class SiteSetting(models.Model):
                 return int(self.setting_value)
             except ValueError:
                 return self.setting_value
+        elif self.setting_type == 'color' and not self.setting_value.startswith('#'):
+            return f"#{self.setting_value}"
         else:
             return self.setting_value
+    
+    @classmethod
+    def get_setting(cls, key, default=None):
+        """Helper method untuk get setting value by key."""
+        try:
+            setting = cls.objects.get(setting_key=key)
+            return setting.get_value()
+        except cls.DoesNotExist:
+            return default
+
 
 class MediaFile(models.Model):
     """
@@ -190,9 +237,9 @@ class MediaFile(models.Model):
     tags = models.CharField(max_length=500, blank=True, help_text="Tags dipisahkan koma")
     
     # Metadata
-    uploaded_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    file_size = models.IntegerField(help_text="Size file dalam bytes")
+    file_size = models.IntegerField(default=0, help_text="Size file dalam bytes")  # Tambah default
     
     class Meta:
         verbose_name = 'Media File'
@@ -208,5 +255,22 @@ class MediaFile(models.Model):
     def save(self, *args, **kwargs):
         """Calculate file size saat save."""
         if self.file:
-            self.file_size = self.file.size
+            try:
+                self.file_size = self.file.size
+            except:
+                self.file_size = 0
         super().save(*args, **kwargs)
+    
+    @property
+    def file_url(self):
+        """Get file URL."""
+        if self.file:
+            return self.file.url
+        return ""
+    
+    @property
+    def file_extension(self):
+        """Get file extension."""
+        if self.file:
+            return self.file.name.split('.')[-1].lower() if '.' in self.file.name else ""
+        return ""
