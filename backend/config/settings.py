@@ -341,19 +341,37 @@ SESSION_COOKIE_NAME = 'logistik_kita_session'
 CSRF_COOKIE_NAME = 'logistik_kita_csrftoken'
 
 # ============ DEVELOPMENT TOOLS ============
+# Debug toolbar configuration
+DEBUG_TOOLBAR_ENABLED = DEBUG and os.getenv('DISABLE_DEBUG_TOOLBAR', 'False') == 'False'
+
 if DEBUG:
-    # Debug toolbar
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
-    INTERNAL_IPS = ['127.0.0.1', 'localhost']
-    
     # Django extensions
     INSTALLED_APPS += ['django_extensions']
+    
+    # Debug toolbar (conditional)
+    if DEBUG_TOOLBAR_ENABLED:
+        try:
+            import debug_toolbar
+            INSTALLED_APPS += ['debug_toolbar']
+            MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+            
+            # Configure toolbar untuk semua IP di development
+            DEBUG_TOOLBAR_CONFIG = {
+                'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+                'SHOW_COLLAPSED': True,
+                'RESULTS_STORE_SIZE': 100,
+            }
+            
+            # Allow semua IP di development
+            INTERNAL_IPS = ['127.0.0.1', 'localhost', '0.0.0.0', '::1']
+            
+        except ImportError:
+            print("Django Debug Toolbar tidak terinstall. Install dengan: pip install django-debug-toolbar")
     
     # Allow more detailed error pages
     import socket
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS += [ip[:-1] + '1' for ip in ips]
+    INTERNAL_IPS = list(set(['127.0.0.1', 'localhost', '0.0.0.0', '::1'] + [ip[:-1] + '1' for ip in ips]))
     
     # SQL logging
     LOGGING['loggers']['django.db.backends'] = {
@@ -364,6 +382,13 @@ if DEBUG:
     
     # Show emails in console
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    
+    # Tambah dummy favicon untuk hindari error
+    STATICFILES_DIRS = [BASE_DIR / 'static'] + [BASE_DIR / 'dummy_static']
+    import tempfile
+    dummy_static_dir = BASE_DIR / 'dummy_static'
+    dummy_static_dir.mkdir(exist_ok=True)
+    (dummy_static_dir / 'favicon.ico').write_bytes(b'')
 
 # ============ PRODUCTION SETTINGS OVERRIDE ============
 # Jika environment variable DJANGO_ENV di-set ke 'production'
