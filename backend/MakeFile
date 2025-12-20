@@ -1,0 +1,65 @@
+# backend/Makefile
+.PHONY: help install migrate run seed test clean docker-up docker-down docker-build
+
+help:
+	@echo "Available commands:"
+	@echo "  install     Install dependencies"
+	@echo "  migrate     Run database migrations"
+	@echo "  run         Run development server"
+	@echo "  seed        Seed initial data"
+	@echo "  test        Run tests"
+	@echo "  clean       Clean pycache files"
+	@echo "  docker-up   Start docker services"
+	@echo "  docker-down Stop docker services"
+	@echo "  docker-build Build docker images"
+
+install:
+	pip install -r requirements.txt
+
+migrate:
+	python manage.py makemigrations
+	python manage.py migrate
+
+run:
+	python manage.py runserver
+
+seed:
+	python manage.py seed_initial_data
+
+test:
+	python manage.py test
+
+clean:
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -delete
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
+
+docker-build:
+	docker-compose build
+
+docker-logs:
+	docker-compose logs -f
+
+docker-shell:
+	docker-compose exec backend python manage.py shell
+
+docker-dbshell:
+	docker-compose exec db psql -U postgres -d logistik_kita
+
+# Development shortcuts
+dev: install migrate seed run
+
+# Production setup
+prod-migrate:
+	python manage.py migrate --settings=config.settings.production
+
+prod-collectstatic:
+	python manage.py collectstatic --noinput --settings=config.settings.production
+
+prod-run:
+	gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application
