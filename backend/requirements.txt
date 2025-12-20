@@ -1,0 +1,24 @@
+# Core Django
+Django==5.0.4
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# Database
+psycopg2-binary==2.9.9
+django-redis==5.3.0
+
+# File handling
+Pillow==10.2.0
+python-magic==0.4.27
+
+# Environment
+python-dotenv==1.0.0
+django-environ==0.11.2
+
+# Utilities
+redis==5.0.1
+celery==5.3.4
+
+# Development
+ipython==8.18.0
+django-debug-toolbar==4.2.0
