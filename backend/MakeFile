@@ -1,18 +1,33 @@
-# backend/Makefile
 .PHONY: help install migrate run seed test clean docker-up docker-down docker-build
 
 help:
-	@echo "Available commands:"
-	@echo "  install     Install dependencies"
-	@echo "  migrate     Run database migrations"
-	@echo "  run         Run development server"
-	@echo "  seed        Seed initial data"
-	@echo "  test        Run tests"
-	@echo "  clean       Clean pycache files"
-	@echo "  docker-up   Start docker services"
-	@echo "  docker-down Stop docker services"
-	@echo "  docker-build Build docker images"
+	@echo "=== LOGISTIK KITA - Backend Management ==="
+	@echo ""
+	@echo "Development Commands:"
+	@echo "  install         Install Python dependencies"
+	@echo "  migrate         Run database migrations"
+	@echo "  run             Run development server"
+	@echo "  seed            Seed initial data"
+	@echo "  test            Run tests"
+	@echo "  clean           Clean pycache files"
+	@echo ""
+	@echo "Docker Commands:"
+	@echo "  docker-up       Start all docker services"
+	@echo "  docker-down     Stop all docker services"
+	@echo "  docker-build    Build docker images"
+	@echo "  docker-logs     View docker logs"
+	@echo ""
+	@echo "Database Commands:"
+	@echo "  shell           Open Django shell"
+	@echo "  dbshell         Open database shell"
+	@echo "  createsuperuser Create admin user"
+	@echo ""
+	@echo "Production Commands:"
+	@echo "  prod-migrate    Run migrations with production settings"
+	@echo "  prod-collect    Collect static files for production"
+	@echo "  prod-run        Run with Gunicorn"
 
+# Development
 install:
 	pip install -r requirements.txt
 
@@ -21,7 +36,7 @@ migrate:
 	python manage.py migrate
 
 run:
-	python manage.py runserver
+	python manage.py runserver 0.0.0.0:8000
 
 seed:
 	python manage.py seed_initial_data
@@ -32,7 +47,15 @@ test:
 clean:
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "__pycache__" -delete
+	find . -type f -name "*.pyo" -delete
+	find . -type f -name "*.so" -delete
+	find . -type f -name "*.coverage" -delete
+	find . -type d -name ".coverage" -delete
+	find . -type d -name ".pytest_cache" -delete
+	find . -type d -name ".cache" -delete
+	rm -f debug.log db.sqlite3
 
+# Docker
 docker-up:
 	docker-compose up -d
 
@@ -45,21 +68,74 @@ docker-build:
 docker-logs:
 	docker-compose logs -f
 
-docker-shell:
-	docker-compose exec backend python manage.py shell
+docker-logs-backend:
+	docker-compose logs -f backend
 
-docker-dbshell:
-	docker-compose exec db psql -U postgres -d logistik_kita
+docker-logs-db:
+	docker-compose logs -f db
+
+docker-restart:
+	docker-compose restart
+
+# Database
+shell:
+	python manage.py shell
+
+dbshell:
+	python manage.py dbshell
+
+createsuperuser:
+	python manage.py createsuperuser
+
+dumpdata:
+	python manage.py dumpdata --indent 2 > db_dump.json
+
+loaddata:
+	python manage.py loaddata db_dump.json
+
+# Production
+prod-migrate:
+	python manage.py migrate --settings=config.settings.production
+
+prod-collect:
+	python manage.py collectstatic --noinput --settings=config.settings.production
+
+prod-run:
+	gunicorn --bind 0.0.0.0:8000 --workers 4 --threads 2 --timeout 120 config.wsgi:application
 
 # Development shortcuts
 dev: install migrate seed run
 
-# Production setup
-prod-migrate:
-	python manage.py migrate --settings=config.settings.production
+dev-docker: docker-build docker-up
+	@echo "Services running:"
+	@echo "- Backend: http://localhost:8000"
+	@echo "- Admin:   http://localhost:8000/admin"
+	@echo "- API:     http://localhost:8000/api/config/"
+	@echo ""
+	@echo "Run 'make docker-logs' to view logs"
 
-prod-collectstatic:
-	python manage.py collectstatic --noinput --settings=config.settings.production
+status:
+	@echo "=== Service Status ==="
+	@docker-compose ps
+	@echo ""
+	@echo "=== API Endpoints ==="
+	@echo "Config API:     http://localhost:8000/api/config/"
+	@echo "Navigation API: http://localhost:8000/api/nav-menus/by_location/?location=header"
+	@echo "Settings API:   http://localhost:8000/api/site-settings/"
+	@echo "Admin Panel:    http://localhost:8000/admin/"
 
-prod-run:
-	gunicorn --bind 0.0.0.0:8000 --workers 3 config.wsgi:application
+# Backup
+backup-db:
+	@echo "Backing up database..."
+	@docker-compose exec -T db pg_dump -U postgres logistik_kita > backup_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "Backup completed"
+
+# Reset
+reset-db:
+	@echo "Resetting database..."
+	@docker-compose down -v
+	@docker-compose up -d db
+	@sleep 5
+	@make migrate
+	@make seed
+	@echo "Database reset completed"
