@@ -1,21 +1,22 @@
 """
 Django settings untuk project LOGISTIK KITA - Development Environment
+File location: backend/config/settings.py
 """
 
 import os
+import sys
 from pathlib import Path
 from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Add apps directory to Python path
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+
 # ============ CORE DJANGO SETTINGS ============
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-development-key-change-in-production')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
-
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,.ngrok-free.app,.github.dev').split(',')
 
 # Application definition
@@ -29,7 +30,7 @@ INSTALLED_APPS = [
     
     # Third party apps
     'rest_framework',
-    'rest_framework_simplejwt',  # JWT Authentication
+    'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
     
@@ -69,24 +70,55 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # ============ DATABASE CONFIGURATION ============
-# Default menggunakan PostgreSQL
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', 'logistik_kita'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
-}
+# PostgreSQL Configuration dengan fallback ke SQLite
+POSTGRES_DB = os.getenv('POSTGRES_DB', 'logistik_kita')
+POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'postgres')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
 
-# Fallback ke SQLite untuk development tanpa PostgreSQL
-if os.getenv('USE_SQLITE', 'False') == 'True':
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Check PostgreSQL availability
+USE_POSTGRESQL = True
+try:
+    import psycopg2
+    conn = psycopg2.connect(
+        dbname=POSTGRES_DB,
+        user=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+        host=POSTGRES_HOST,
+        port=POSTGRES_PORT,
+        connect_timeout=5
+    )
+    conn.close()
+    print(f"✅ PostgreSQL connected successfully to {POSTGRES_DB}")
+except Exception as e:
+    USE_POSTGRESQL = False
+    print(f"⚠️  PostgreSQL connection failed: {str(e)[:100]}...")
+    print("📁 Falling back to SQLite for development")
+
+if USE_POSTGRESQL and os.getenv('USE_SQLITE', 'False') != 'True':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': POSTGRES_DB,
+            'USER': POSTGRES_USER,
+            'PASSWORD': POSTGRES_PASSWORD,
+            'HOST': POSTGRES_HOST,
+            'PORT': POSTGRES_PORT,
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'connect_timeout': 10,
+            }
+        }
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print("📁 Using SQLite database for development")
 
 # ============ CACHE CONFIGURATION ============
 CACHES = {
@@ -101,7 +133,6 @@ CACHES = {
     }
 }
 
-# Fallback ke local memory cache jika Redis tidak tersedia
 if os.getenv('USE_MEMORY_CACHE', 'False') == 'True':
     CACHES['default'] = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -115,9 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
+        'OPTIONS': {'min_length': 8}
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -141,16 +170,15 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============ REST FRAMEWORK CONFIGURATION ============
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Development only, production ganti ke IsAuthenticated
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT Authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
@@ -163,7 +191,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # Untuk development
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -179,12 +207,12 @@ REST_FRAMEWORK = {
 
 # ============ JWT CONFIGURATION ============
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_ACCESS_TOKEN_LIFETIME', 15))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_TOKEN_LIFETIME', 7))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': os.getenv('JWT_ALGORITHM', 'HS256'),
-    'SIGNING_KEY': os.getenv('JWT_SECRET_KEY', SECRET_KEY),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
     'AUTH_HEADER_TYPES': ('Bearer', 'JWT'),
     'USER_ID_FIELD': 'id',
@@ -192,8 +220,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'JTI_CLAIM': 'jti',
-    
-    # Custom settings
     'TOKEN_OBTAIN_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenObtainPairSerializer',
     'TOKEN_REFRESH_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenRefreshSerializer',
     'TOKEN_VERIFY_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenVerifySerializer',
@@ -201,11 +227,13 @@ SIMPLE_JWT = {
 }
 
 # ============ CORS CONFIGURATION ============
-CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'True') == 'True'
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,https://localhost:3000').split(',')
-CORS_ALLOWED_ORIGIN_REGEXES = []
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://localhost:3000",
+]
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -218,7 +246,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'x-api-key',
 ]
-
 CORS_EXPOSE_HEADERS = [
     'content-type',
     'x-total-count',
@@ -227,22 +254,22 @@ CORS_EXPOSE_HEADERS = [
 
 # ============ SECURITY SETTINGS ============
 SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', 5242880))  # 5MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', 5242880))  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 # ============ CACHE TIMEOUT CONFIGURATION ============
 CACHE_TIMEOUT = {
-    'navigation': 300,      # 5 menit
-    'site_settings': 600,   # 10 menit
-    'media_files': 3600,    # 1 jam
-    'config': 300,          # 5 menit
-    'geo_data': 86400,      # 24 jam untuk data geolokasi
+    'navigation': 300,
+    'site_settings': 600,
+    'media_files': 3600,
+    'config': 300,
+    'geo_data': 86400,
 }
 
 # ============ LOGGING CONFIGURATION ============
@@ -269,7 +296,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / os.getenv('LOG_FILE', 'debug.log'),
+            'filename': BASE_DIR / 'debug.log',
             'formatter': 'verbose',
         },
         'json_file': {
@@ -281,7 +308,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level': 'INFO',
             'propagate': True,
         },
         'apps.navigation': {
@@ -307,73 +334,58 @@ LOGGING = {
 }
 
 # ============ EMAIL CONFIGURATION ============
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
-EMAIL_SUBJECT_PREFIX = os.getenv('EMAIL_SUBJECT_PREFIX', '[LOGISTIK KITA] ')
 
 # ============ API SERVICES CONFIGURATION ============
-# TOMTOM API Configuration
 TOMTOM_API_KEY = os.getenv('TOMTOM_API_KEY', '')
-TOMTOM_API_BASE_URL = os.getenv('TOMTOM_API_BASE_URL', 'https://api.tomtom.com')
-TOMTOM_VERSION_NUMBER = os.getenv('TOMTOM_VERSION_NUMBER', '2')
-TOMTOM_LANGUAGE = os.getenv('TOMTOM_LANGUAGE', 'id-ID')
+TOMTOM_API_BASE_URL = 'https://api.tomtom.com'
+TOMTOM_VERSION_NUMBER = '2'
+TOMTOM_LANGUAGE = 'id-ID'
 
-# EMSIFA API Configuration (Indonesia Regions)
 EMSIFA_API_KEY = os.getenv('EMSIFA_API_KEY', '')
-EMSIFA_API_BASE_URL = os.getenv('EMSIFA_API_BASE_URL', 'https://emsifa.github.io/api-wilayah-indonesia/api')
+EMSIFA_API_BASE_URL = 'https://emsifa.github.io/api-wilayah-indonesia/api'
 
 # ============ APPLICATION SETTINGS ============
-# Site settings untuk frontend
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 API_VERSION = 'v1'
 APP_VERSION = '1.0.0'
 APP_NAME = 'LOGISTIK KITA'
 
-# Authentication settings
-SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_NAME = 'logistik_kita_session'
 CSRF_COOKIE_NAME = 'logistik_kita_csrftoken'
 
 # ============ DEVELOPMENT TOOLS ============
-# Debug toolbar configuration
-DEBUG_TOOLBAR_ENABLED = DEBUG and os.getenv('DISABLE_DEBUG_TOOLBAR', 'False') == 'False'
-
 if DEBUG:
+    # Create necessary directories
+    os.makedirs(BASE_DIR / 'static', exist_ok=True)
+    os.makedirs(BASE_DIR / 'media', exist_ok=True)
+    os.makedirs(BASE_DIR / 'templates', exist_ok=True)
+    
     # Django extensions
     INSTALLED_APPS += ['django_extensions']
     
-    # Debug toolbar (conditional)
-    if DEBUG_TOOLBAR_ENABLED:
+    # Debug toolbar (optional)
+    if os.getenv('DISABLE_DEBUG_TOOLBAR', 'False') == 'False':
         try:
             import debug_toolbar
             INSTALLED_APPS += ['debug_toolbar']
-            MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
-            
-            # Configure toolbar untuk semua IP di development
+            MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+            INTERNAL_IPS = ['127.0.0.1', 'localhost', '0.0.0.0', '::1']
             DEBUG_TOOLBAR_CONFIG = {
                 'SHOW_TOOLBAR_CALLBACK': lambda request: True,
-                'SHOW_COLLAPSED': True,
-                'RESULTS_STORE_SIZE': 100,
             }
-            
-            # Allow semua IP di development
-            INTERNAL_IPS = ['127.0.0.1', 'localhost', '0.0.0.0', '::1']
-            
+            print("✅ Debug Toolbar enabled")
         except ImportError:
-            print("Django Debug Toolbar tidak terinstall. Install dengan: pip install django-debug-toolbar")
+            print("⚠️  Debug Toolbar not installed")
     
-    # Allow more detailed error pages
-    import socket
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = list(set(['127.0.0.1', 'localhost', '0.0.0.0', '::1'] + [ip[:-1] + '1' for ip in ips]))
-    
-    # SQL logging
+    # Enable SQL logging
     LOGGING['loggers']['django.db.backends'] = {
         'handlers': ['console'],
         'level': 'DEBUG',
@@ -382,19 +394,17 @@ if DEBUG:
     
     # Show emails in console
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    
-    # Tambah dummy favicon untuk hindari error
-    STATICFILES_DIRS = [BASE_DIR / 'static'] + [BASE_DIR / 'dummy_static']
-    import tempfile
-    dummy_static_dir = BASE_DIR / 'dummy_static'
-    dummy_static_dir.mkdir(exist_ok=True)
-    (dummy_static_dir / 'favicon.ico').write_bytes(b'')
 
-# ============ PRODUCTION SETTINGS OVERRIDE ============
-# Jika environment variable DJANGO_ENV di-set ke 'production'
+# ============ PRODUCTION SETTINGS ============
 if os.getenv('DJANGO_ENV') == 'production':
-    try:
-        from .production import *
-        print("Production settings loaded")
-    except ImportError:
-        print("Production settings file not found, using development settings")
+    DEBUG = False
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    print("⚡ Production mode enabled")
+
+print(f"🚀 {APP_NAME} initialized")
+print(f"📊 Database: {DATABASES['default']['ENGINE']}")
+print(f"🔧 Debug: {DEBUG}")
+print(f"🌐 Frontend URL: {FRONTEND_URL}")
