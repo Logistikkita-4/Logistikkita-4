@@ -16,16 +16,18 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { useSiteConfig } from '../../hooks/useSiteConfig';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
-import ThemeToggle from '../ui/ThemeToggle';
-import SearchBar from '../ui/SearchBar';
 import UserMenu from './UserMenu';
+
+// --- BAGIAN YANG DIPERBAIKI (Import dari folder yang sama './') ---
+import ThemeToggle from './ThemeToggle';
+import SearchBar from './SearchBar';
+// ------------------------------------------------------------------
 
 // Icons dari react-icons
 import { 
   HiMenu, 
   HiX, 
   HiSearch, 
-  HiUser, 
   HiShoppingCart,
   HiBell
 } from 'react-icons/hi';
@@ -40,8 +42,12 @@ const Navbar = () => {
   
   // Custom hooks untuk data fetching
   const { theme, toggleTheme } = useTheme();
-  const { navigationData, loading: navLoading } = useNavigation('header');
-  const { siteSettings, loading: settingsLoading } = useSiteConfig();
+  // Menggunakan optional chaining/fallback untuk menghindari error jika hooks belum siap
+  const navData = useNavigation('header') || {}; 
+  const { navigationData, loading: navLoading } = navData;
+  
+  const configData = useSiteConfig() || {};
+  const { siteSettings, loading: settingsLoading } = configData;
   
   // Effect untuk handle scroll behavior
   useEffect(() => {
@@ -100,7 +106,20 @@ const Navbar = () => {
         { id: 25, title: 'Jenis Layanan', url: '/maintenance' },
       ]
     },
-    // ... tambahkan lainnya sesuai struktur
+    {
+        id: 3,
+        title: 'Tentang Kami',
+        url: '/about',
+        icon: 'Info',
+        children: []
+    },
+    {
+        id: 4,
+        title: 'Kontak',
+        url: '/contact',
+        icon: 'Phone',
+        children: []
+    }
   ];
   
   // Site branding dari API
