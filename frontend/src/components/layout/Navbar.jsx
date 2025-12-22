@@ -222,29 +222,16 @@ const Navbar = () => {
             {/* Right Side Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
               
-              {/* Search Button/Bar */}
-              <div className="relative">
-                {isSearchOpen ? (
-                  <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2"
-                  >
-                    <SearchBar onClose={() => setIsSearchOpen(false)} />
-                  </motion.div>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsSearchOpen(true)}
-                    className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    aria-label="Search"
-                  >
-                    <HiSearch className="h-5 w-5" />
-                  </motion.button>
-                )}
-              </div>
+              {/* Search Button */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsSearchOpen(true)}
+                className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Search"
+              >
+                <HiSearch className="h-5 w-5" />
+              </motion.button>
               
               {/* Cart Icon (optional) */}
               <motion.button
@@ -288,6 +275,9 @@ const Navbar = () => {
           </div>
         </div>
       </motion.nav>
+      
+      {/* SearchBar Overlay - DIPINDAHKAN KE ROOT LEVEL */}
+      {isSearchOpen && <SearchBar onClose={() => setIsSearchOpen(false)} />}
       
       {/* Mobile Navigation Overlay */}
       <AnimatePresence>
