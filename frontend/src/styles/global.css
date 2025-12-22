@@ -1,5 +1,5 @@
 /**
- * Global Styles dengan Tailwind dan Custom CSS
+ * Global Styles dengan Tailwind dan Custom CSS - OPTIMIZED
  */
 
 @tailwind base;
@@ -47,6 +47,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--color-background);
   color: var(--color-text);
+  /* Optimized transition: Hanya transisi warna, bukan layout */
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
@@ -86,9 +87,14 @@ body {
   outline: none;
 }
 
-/* Smooth transitions */
-a, button, input, textarea {
-  transition: all 0.2s ease;
+/* Smooth transitions - OPTIMIZED */
+/* Mengganti 'all' dengan properti spesifik agar ringan */
+a, button {
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+input, textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Utility classes */
@@ -169,10 +175,7 @@ a, button, input, textarea {
   -webkit-backdrop-filter: blur(16px);
 }
 
-.backdrop-blur-2xl {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
+/* Dihapus: blur-2xl (24px) karena terlalu berat */
 
 /* Responsive typography */
 @media (max-width: 640px) {
