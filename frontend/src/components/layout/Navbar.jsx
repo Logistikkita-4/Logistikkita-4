@@ -1,7 +1,7 @@
 /**
  * FILE: src/components/layout/Navbar.js
  * PERBAIKAN HAMBURGER MENU & PERFORMANCE:
- * 1. Z-index mobile menu ditingkatkan (40 → 60) agar muncul di atas navbar
+ * 1. Z-index mobile menu ditingkatkan (60 → 70) agar muncul di atas navbar dan konten
  * 2. Kurangi efek blur untuk mobile performance
  * 3. Optimasi animasi spring (damping: 25 → 20)
  * 4. Hapus efek saturate yang berat
@@ -291,8 +291,8 @@ const Navbar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              // PERBAIKAN: Z-index ditingkatkan dari 40 ke 60 agar muncul di atas navbar
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 lg:hidden"
+              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 70 agar muncul di atas semua elemen
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 lg:hidden"
               style={{ willChange: 'opacity' }}
             />
             
@@ -303,15 +303,15 @@ const Navbar = () => {
               exit={{ x: '-100%' }}
               // PERBAIKAN: Optimasi animasi spring (damping: 25 → 20)
               transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-              // PERBAIKAN: Z-index ditingkatkan dari 40 ke 60
-              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-60 lg:hidden"
+              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 70
+              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-70 lg:hidden overflow-y-auto"
               style={{
                 // PERBAIKAN: Kurangi blur untuk performance (xl → lg)
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 borderRight: '1px solid rgba(255, 255, 255, 0.1)',
                 // PERBAIKAN: Tambah will-change untuk performance
-                willChange: 'transform',
+                will-change: 'transform',
               }}
             >
               <MobileNav 
