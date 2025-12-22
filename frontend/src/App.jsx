@@ -1,20 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// PERBAIKAN: Import ThemeProvider
+import { ThemeProvider } from './contexts/ThemeContext';
+
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import MaintenancePage from './pages/MaintenancePage';
 
-// PERBAIKAN: Import ThemeProvider
-import { ThemeProvider } from './contexts/ThemeContext';
-
 import './styles/global.css'; 
 import './styles/glass.css';
 
 function App() {
   return (
-    // PERBAIKAN: Wrap seluruh aplikasi dengan ThemeProvider
+    // PERBAIKAN: WRAP SELURUH APLIKASI DENGAN THEMEPROVIDER
     <ThemeProvider>
       <Router>
         <Layout>
