@@ -1,3 +1,8 @@
+/**
+ * Search Bar Component asli dengan perbaikan layout mobile
+ * Mengembalikan seluruh fungsionalitas 100%
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -8,7 +13,7 @@ import {
   HiChevronUp as HiOutlineArrowUp,
   HiChevronDown as HiOutlineArrowDown,
   HiCommandLine as HiOutlineCommandLine
-} from 'react-icons/hi2';
+} from 'react-icons/hi2'; // Menggunakan Hi2 untuk mencegah error element invalid
 
 const SearchBar = ({ onClose }) => {
   const [query, setQuery] = useState('');
@@ -19,13 +24,14 @@ const SearchBar = ({ onClose }) => {
   const inputRef = useRef(null);
   const suggestionsRef = useRef(null);
 
-  // KODE ASLI 100%
+  // Load recent searches dari localStorage
   useEffect(() => {
     const saved = localStorage.getItem('recent_searches');
     if (saved) {
       setRecentSearches(JSON.parse(saved).slice(0, 5));
     }
 
+    // Popular searches (bisa dari API)
     setPopularSearches([
       { id: 1, text: 'Tarif pengiriman Jakarta - Surabaya', count: 245 },
       { id: 2, text: 'Lacak resi pengiriman', count: 189 },
@@ -35,13 +41,15 @@ const SearchBar = ({ onClose }) => {
     ]);
   }, []);
 
-  // KODE ASLI 100%
+  // Focus input saat component mount
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
 
+    // Keyboard shortcut listener
     const handleKeyDown = (e) => {
+      // Ctrl+K untuk focus search
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         if (inputRef.current) {
@@ -49,10 +57,12 @@ const SearchBar = ({ onClose }) => {
         }
       }
 
+      // Escape untuk close
       if (e.key === 'Escape') {
         onClose();
       }
 
+      // Arrow navigation untuk suggestions
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         const suggestions = [...recentSearches, ...popularSearches];
@@ -67,6 +77,7 @@ const SearchBar = ({ onClose }) => {
         
         setActiveSuggestion(newIndex);
         
+        // Scroll ke suggestion yang aktif
         if (suggestionsRef.current && suggestionsRef.current.children[newIndex]) {
           suggestionsRef.current.children[newIndex].scrollIntoView({
             block: 'nearest',
@@ -75,6 +86,7 @@ const SearchBar = ({ onClose }) => {
         }
       }
 
+      // Enter untuk select suggestion
       if (e.key === 'Enter' && activeSuggestion >= 0) {
         e.preventDefault();
         const suggestions = [...recentSearches, ...popularSearches];
@@ -88,10 +100,11 @@ const SearchBar = ({ onClose }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [activeSuggestion, recentSearches, popularSearches, onClose]);
 
-  // KODE ASLI 100%
+  // Handle search
   const handleSearch = (searchText = query) => {
     if (!searchText.trim()) return;
 
+    // Add to recent searches
     const updatedRecent = [
       searchText,
       ...recentSearches.filter(s => s !== searchText && s.text !== searchText)
@@ -100,27 +113,35 @@ const SearchBar = ({ onClose }) => {
     setRecentSearches(updatedRecent);
     localStorage.setItem('recent_searches', JSON.stringify(updatedRecent));
 
+    // Perform search (simulasi)
+    console.log('Searching for:', searchText);
+    
+    // Reset dan close
     setQuery('');
     onClose();
   };
 
+  // Clear recent searches
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem('recent_searches');
   };
 
+  // Remove single recent search
   const removeRecentSearch = (index) => {
     const updated = recentSearches.filter((_, i) => i !== index);
     setRecentSearches(updated);
     localStorage.setItem('recent_searches', JSON.stringify(updated));
   };
 
+  // Handle suggestion click
   const handleSuggestionClick = (suggestion) => {
     const text = typeof suggestion === 'string' ? suggestion : suggestion.text;
     setQuery(text);
     handleSearch(text);
   };
 
+  // Suggestions based on query
   const filteredSuggestions = query ? [
     ...recentSearches.filter(s => 
       s.toLowerCase().includes(query.toLowerCase()) || 
@@ -136,21 +157,26 @@ const SearchBar = ({ onClose }) => {
   const showPopularSearches = popularSearches.length > 0 && !query;
 
   return (
-    /* PERBAIKAN: Menggunakan .glass-overlay dari glass.css Anda */
-    <div className="fixed inset-0 z-[999] flex items-start justify-center pt-16 sm:pt-24 px-4 glass-overlay">
-      {/* Click outside area */}
+    /* PERBAIKAN LAYOUT: Wrapper Fixed Overlay agar posisi SearchBar rapi di tengah layar mobile */
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-20 px-4 glass-overlay">
+      {/* Click outside to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
       <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
         className="relative w-full max-w-2xl"
       >
-        {/* PERBAIKAN: Menggunakan .glass-card dari glass.css Anda agar sinkron */}
-        <div className="overflow-hidden shadow-2xl glass-card dark:glass-card-dark">
-          {/* Search Input - KODE ASLI 100% */}
+        {/* Search Container dengan Glass Effect Asli Anda */}
+        <div 
+          className="relative rounded-xl overflow-hidden glass-card dark:glass-card-dark"
+          style={{
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          {/* Search Input */}
           <div className="flex items-center p-4 border-b border-gray-100 dark:border-gray-800">
             <HiSearch className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
             
@@ -170,15 +196,18 @@ const SearchBar = ({ onClose }) => {
               spellCheck="false"
             />
             
+            {/* Clear button */}
             {query && (
               <button
                 onClick={() => setQuery('')}
                 className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ml-2"
+                aria-label="Clear search"
               >
                 <HiX className="h-4 w-4 text-gray-400" />
               </button>
             )}
             
+            {/* Keyboard shortcut hint */}
             <div className="hidden sm:flex items-center ml-4 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <HiOutlineCommandLine className="h-3 w-3 text-gray-500 mr-1" />
               <kbd className="text-xs font-mono text-gray-600 dark:text-gray-300">Ctrl</kbd>
@@ -186,15 +215,17 @@ const SearchBar = ({ onClose }) => {
               <kbd className="text-xs font-mono text-gray-600 dark:text-gray-300">K</kbd>
             </div>
             
+            {/* Close button */}
             <button
               onClick={onClose}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ml-2"
+              aria-label="Close search"
             >
               <HiX className="h-5 w-5 text-gray-500" />
             </button>
           </div>
           
-          {/* Suggestions Panel - KODE ASLI 100% */}
+          {/* Suggestions Panel */}
           <AnimatePresence>
             {(hasSuggestions || showRecentSearches || showPopularSearches) && (
               <motion.div
@@ -205,6 +236,7 @@ const SearchBar = ({ onClose }) => {
                 className="overflow-hidden"
               >
                 <div ref={suggestionsRef} className="max-h-96 overflow-y-auto">
+                  {/* Search Results */}
                   {hasSuggestions && (
                     <div className="p-4">
                       <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
@@ -228,6 +260,11 @@ const SearchBar = ({ onClose }) => {
                                   {typeof suggestion === 'string' ? suggestion : suggestion.text}
                                 </span>
                               </div>
+                              {suggestion.count && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+                                  {suggestion.count} pencarian
+                                </span>
+                              )}
                             </button>
                           </li>
                         ))}
@@ -235,6 +272,7 @@ const SearchBar = ({ onClose }) => {
                     </div>
                   )}
                   
+                  {/* Recent Searches */}
                   {showRecentSearches && (
                     <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                       <div className="flex items-center justify-between mb-3">
@@ -271,6 +309,7 @@ const SearchBar = ({ onClose }) => {
                                   removeRecentSearch(index);
                                 }}
                                 className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+                                aria-label="Remove search"
                               >
                                 <HiX className="h-3 w-3 text-gray-400" />
                               </button>
@@ -315,6 +354,7 @@ const SearchBar = ({ onClose }) => {
                     </div>
                   )}
                   
+                  {/* Search tips */}
                   <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
                     <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-4">
                       <div className="flex items-center">
@@ -337,14 +377,14 @@ const SearchBar = ({ onClose }) => {
             )}
           </AnimatePresence>
           
-          {/* Search Button - KODE ASLI 100% */}
+          {/* Search Button */}
           <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={() => handleSearch()}
               disabled={!query.trim()}
               className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
                 query.trim()
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               }`}
             >
