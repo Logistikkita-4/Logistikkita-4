@@ -1,12 +1,9 @@
 /**
- * Main Navigation Bar Component
- * Features:
- * - Glass morphism effect dengan backdrop blur
- * - Responsive design (Desktop & Mobile)
- * - Dynamic menu dari API
- * - Theme toggle (Dark/Light mode)
- * - Search functionality
- * - User authentication state
+ * Main Navigation Bar Component - PERBAIKAN LENGKAP
+ * PERBAIKAN YANG DILAKUKAN:
+ * 1. HAPUS CART ICON (sesuai permintaan)
+ * 2. NOTIFIKASI HANYA SAAT USER LOGIN
+ * 3. TAMBAH AUTH STATE MANAGEMENT
  */
 
 import React, { useState, useEffect } from 'react';
@@ -17,18 +14,14 @@ import { useSiteConfig } from '../../hooks/useSiteConfig';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
 import UserMenu from './UserMenu';
-
-// --- BAGIAN YANG DIPERBAIKI (Import dari folder yang sama './') ---
 import ThemeToggle from './ThemeToggle';
 import SearchBar from './SearchBar';
-// ------------------------------------------------------------------
 
 // Icons dari react-icons
 import { 
   HiMenu, 
   HiX, 
   HiSearch, 
-  HiShoppingCart,
   HiBell
 } from 'react-icons/hi';
 import { FaTruck } from 'react-icons/fa';
@@ -40,14 +33,22 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
+  // PERBAIKAN: Tambah state authentication sederhana
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
   // Custom hooks untuk data fetching
   const { theme, toggleTheme } = useTheme();
-  // Menggunakan optional chaining/fallback untuk menghindari error jika hooks belum siap
   const navData = useNavigation('header') || {}; 
   const { navigationData, loading: navLoading } = navData;
   
   const configData = useSiteConfig() || {};
   const { siteSettings, loading: settingsLoading } = configData;
+  
+  // PERBAIKAN: Cek authentication status saat component mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    setIsAuthenticated(!!token);
+  }, []);
   
   // Effect untuk handle scroll behavior
   useEffect(() => {
@@ -155,13 +156,9 @@ const Navbar = () => {
             : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-md'
         }`}
         style={{
-          // Glass effect dengan CSS custom properties
-          '--navbar-bg-light': 'rgba(255, 255, 255, 0.8)',
-          '--navbar-bg-dark': 'rgba(15, 23, 42, 0.8)',
-          '--navbar-border': 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(12px) saturate(180%)',
           WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-          borderBottom: '1px solid var(--navbar-border)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,31 +230,23 @@ const Navbar = () => {
                 <HiSearch className="h-5 w-5" />
               </motion.button>
               
-              {/* Cart Icon (optional) */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Shopping cart"
-              >
-                <HiShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </motion.button>
+              {/* PERBAIKAN: NOTIFIKASI HANYA SAAT USER LOGIN */}
+              {isAuthenticated && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Notifications"
+                >
+                  <HiBell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 text-white text-xs rounded-full flex items-center justify-center">
+                    5
+                  </span>
+                </motion.button>
+              )}
               
-              {/* Notifications */}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Notifications"
-              >
-                <HiBell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 text-white text-xs rounded-full flex items-center justify-center">
-                  5
-                </span>
-              </motion.button>
+              {/* PERBAIKAN: CART ICON DIHAPUS SESUAI PERMINTAAN */}
+              {/* Cart icon telah dihapus */}
               
               {/* Theme Toggle */}
               <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
@@ -276,7 +265,7 @@ const Navbar = () => {
         </div>
       </motion.nav>
       
-      {/* SearchBar Overlay - DIPINDAHKAN KE ROOT LEVEL */}
+      {/* SearchBar Overlay */}
       {isSearchOpen && <SearchBar onClose={() => setIsSearchOpen(false)} />}
       
       {/* Mobile Navigation Overlay */}
