@@ -1,123 +1,73 @@
 /**
- * Theme Toggle Component - PERBAIKAN: Real-time updates dengan Context API
- * PERBAIKAN:
- * 1. Gunakan useTheme() hook untuk akses theme state global
- * 2. Tidak perlu props dari parent (Navbar)
- * 3. Akan re-render otomatis ketika theme berubah
+ * Theme Toggle Component
+ * PERBAIKAN: Gunakan ThemeContext bukan useTheme hook untuk konsistensi
+ * Agar theme berubah tanpa perlu refresh halaman
  */
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { HiSun, HiMoon, HiDesktopComputer } from 'react-icons/hi';
-import { useTheme } from '../../hooks/useTheme'; // PERBAIKAN: Import useTheme hook
+
+// PERBAIKAN: Gunakan useThemeContext dari ThemeContext
+import { useThemeContext } from '../../contexts/ThemeContext';
 
 const ThemeToggle = () => {
-  // PERBAIKAN: Gunakan useTheme() untuk akses theme state global
-  const { theme, toggleTheme } = useTheme();
-  
-  // Debug log untuk memastikan theme berubah
-  React.useEffect(() => {
-    console.log('ThemeToggle: theme updated to', theme);
-  }, [theme]);
-  
+  // PERBAIKAN: Gunakan useThemeContext, bukan useTheme
+  const { theme, toggleTheme, isDark } = useThemeContext();
+
+  // Icon berdasarkan theme
+  const getIcon = () => {
+    switch (theme) {
+      case 'dark':
+        return <HiMoon className="h-5 w-5" />;
+      case 'system':
+        return <HiDesktopComputer className="h-5 w-5" />;
+      default:
+        return <HiSun className="h-5 w-5" />;
+    }
+  };
+
+  // Tooltip text
+  const getTooltip = () => {
+    switch (theme) {
+      case 'dark':
+        return 'Dark Mode';
+      case 'system':
+        return 'System Theme';
+      default:
+        return 'Light Mode';
+    }
+  };
+
+  // PERBAIKAN: Color theme untuk button
+  const getButtonClass = () => {
+    if (isDark) {
+      return 'bg-gray-800 text-yellow-300 hover:bg-gray-700';
+    } else {
+      return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+    }
+  };
+
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       onClick={toggleTheme}
       className={`
-        relative p-2 rounded-full
-        bg-gray-100 dark:bg-gray-800
-        text-gray-600 dark:text-gray-300
-        hover:bg-gray-200 dark:hover:bg-gray-700
-        transition-colors duration-200
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+        relative p-2 rounded-full transition-all duration-200
+        ${getButtonClass()}
       `}
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      title={`Current: ${theme} - Click to toggle`}
+      aria-label={`Toggle theme (Current: ${getTooltip()})`}
+      title={getTooltip()}
+      style={{ willChange: 'transform' }}
     >
-      <div className="relative h-5 w-5">
-        {/* Sun icon (light mode) */}
-        <motion.div
-          key={`sun-${theme}`} // PERBAIKAN: Tambah key untuk force re-render
-          initial={false}
-          animate={{
-            scale: theme === 'light' ? 1 : 0,
-            rotate: theme === 'light' ? 0 : 90,
-            opacity: theme === 'light' ? 1 : 0
-          }}
-          transition={{ 
-            duration: 0.3,
-            type: "spring",
-            stiffness: 200,
-            damping: 15
-          }}
-          className="absolute inset-0"
-        >
-          <HiSun className="h-5 w-5 text-yellow-500" />
-        </motion.div>
-        
-        {/* Moon icon (dark mode) */}
-        <motion.div
-          key={`moon-${theme}`} // PERBAIKAN: Tambah key untuk force re-render
-          initial={false}
-          animate={{
-            scale: theme === 'dark' ? 1 : 0,
-            rotate: theme === 'dark' ? 0 : -90,
-            opacity: theme === 'dark' ? 1 : 0
-          }}
-          transition={{ 
-            duration: 0.3,
-            type: "spring",
-            stiffness: 200,
-            damping: 15
-          }}
-          className="absolute inset-0"
-        >
-          <HiMoon className="h-5 w-5 text-blue-400" />
-        </motion.div>
-        
-        {/* System icon */}
-        <motion.div
-          key={`system-${theme}`} // PERBAIKAN: Tambah key untuk force re-render
-          initial={false}
-          animate={{
-            scale: theme === 'system' ? 1 : 0,
-            opacity: theme === 'system' ? 1 : 0
-          }}
-          transition={{ 
-            duration: 0.3,
-            type: "spring",
-            stiffness: 200,
-            damping: 15
-          }}
-          className="absolute inset-0"
-        >
-          <HiDesktopComputer className="h-5 w-5 text-gray-500" />
-        </motion.div>
-      </div>
+      {getIcon()}
       
-      {/* Ripple effect */}
-      <motion.span
-        className="absolute inset-0 rounded-full bg-current opacity-0"
-        initial={false}
-        animate={{ opacity: 0 }}
-        whileTap={{ opacity: 0.1 }}
-      />
-      
-      {/* PERBAIKAN: Visual indicator untuk debugging (hapus di production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="absolute -top-1 -right-1 h-2 w-2">
-          <motion.div
-            animate={{
-              scale: [1, 1.5, 1],
-              backgroundColor: theme === 'dark' ? '#10B981' : '#F59E0B'
-            }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            className="h-full w-full rounded-full"
-          />
-        </div>
-      )}
+      {/* Theme indicator dot */}
+      <span className={`
+        absolute -top-1 -right-1 h-2 w-2 rounded-full
+        ${isDark ? 'bg-yellow-400' : 'bg-blue-500'}
+      `} />
     </motion.button>
   );
 };
