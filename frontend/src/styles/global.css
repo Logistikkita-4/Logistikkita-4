@@ -1,9 +1,10 @@
 /**
- * Global Styles dengan Tailwind dan Custom CSS - PERBAIKAN KONTRA
+ * FILE: src/styles/global.css
  * PERBAIKAN YANG DILAKUKAN:
  * 1. Perbaiki color variables untuk kontras yang lebih baik
  * 2. Text colors yang lebih readable di dark mode
- * 3. Tambah warna untuk aksesibilitas yang lebih baik
+ * 3. Tambah performance optimizations untuk mobile
+ * 4. Optimasi scroll performance
  */
 
 @tailwind base;
@@ -48,11 +49,14 @@
   --navbar-bg: rgba(15, 23, 42, 0.95);
 }
 
-/* ===== Base styles ===== */
+/* ===== Base styles dengan performance optimizations ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* PERBAIKAN: Optimasi rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -66,6 +70,8 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
   line-height: 1.6;
+  /* PERBAIKAN: Optimasi performance */
+  text-rendering: optimizeLegibility;
 }
 
 /* PERBAIKAN: Text contrast utilities */
@@ -129,9 +135,12 @@ body {
   outline-color: var(--color-accent);
 }
 
-/* ===== Smooth transitions ===== */
+/* ===== Smooth transitions dengan performance optimizations ===== */
 a, button {
   transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  /* PERBAIKAN: Optimasi transform rendering */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 input, textarea, select {
@@ -191,7 +200,7 @@ input, textarea, select {
   background: linear-gradient(135deg, var(--color-secondary), #a78bfa);
 }
 
-/* ===== Animations ===== */
+/* ===== Animations dengan performance optimizations ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -223,14 +232,18 @@ input, textarea, select {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
+  /* PERBAIKAN: Optimasi animation rendering */
+  will-change: opacity, transform;
 }
 
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
+  will-change: transform;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+  will-change: box-shadow;
 }
 
 /* PERBAIKAN: Animation untuk dark mode */
@@ -243,21 +256,26 @@ input, textarea, select {
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  /* PERBAIKAN: Optimasi backdrop-filter */
+  will-change: backdrop-filter;
 }
 
 .backdrop-blur-md {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  will-change: backdrop-filter;
 }
 
 .backdrop-blur-lg {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  will-change: backdrop-filter;
 }
 
 .backdrop-blur-xl {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  will-change: backdrop-filter;
 }
 
 /* PERBAIKAN: Glass effect dengan kontras yang lebih baik */
@@ -283,10 +301,12 @@ input, textarea, select {
   border-color: var(--color-secondary);
 }
 
-/* ===== Responsive typography ===== */
-@media (max-width: 640px) {
+/* ===== PERBAIKAN: Mobile Performance Optimizations ===== */
+@media (max-width: 768px) {
   html {
     font-size: 15px; /* Sedikit lebih besar untuk mobile readability */
+    /* PERBAIKAN: Hapus smooth scroll di mobile untuk performance */
+    scroll-behavior: auto;
   }
   
   /* PERBAIKAN: Text size untuk mobile dengan kontras yang baik */
@@ -298,6 +318,24 @@ input, textarea, select {
   .mobile-text-base {
     font-size: 1rem;
     line-height: 1.6;
+  }
+  
+  /* PERBAIKAN: Kurangi efek blur di mobile untuk performance */
+  .backdrop-blur-lg,
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  /* PERBAIKAN: Non-aktifkan animasi kompleks di mobile jika prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -313,6 +351,43 @@ input, textarea, select {
     --color-text: #ffffff;
     --color-text-secondary: #cccccc;
     --color-background: #000000;
+  }
+}
+
+/* ===== PERBAIKAN: Hardware Acceleration Utilities ===== */
+.hardware-accelerate {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.prevent-layout-shift {
+  contain: layout style paint;
+}
+
+.animate-element {
+  will-change: transform, opacity;
+}
+
+.fixed-animated {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* ===== PERBAIKAN: iOS Specific Optimizations ===== */
+@supports (-webkit-touch-callout: none) {
+  /* iOS specific optimizations */
+  .glass,
+  .glass-card {
+    -webkit-backdrop-filter: blur(6px); /* Kurangi untuk iOS performance */
+  }
+  
+  body {
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 }
 
