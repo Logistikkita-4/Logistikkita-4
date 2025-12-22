@@ -1,38 +1,54 @@
 /**
- * Global Styles dengan Tailwind dan Custom CSS - OPTIMIZED
+ * Global Styles dengan Tailwind dan Custom CSS - PERBAIKAN KONTRA
+ * PERBAIKAN YANG DILAKUKAN:
+ * 1. Perbaiki color variables untuk kontras yang lebih baik
+ * 2. Text colors yang lebih readable di dark mode
+ * 3. Tambah warna untuk aksesibilitas yang lebih baik
  */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Custom Properties untuk themes */
+/* ===== CSS Custom Properties untuk themes ===== */
+/* PERBAIKAN: Color palette dengan kontras yang lebih tinggi */
+
 :root {
-  /* Light theme colors */
-  --color-primary: #3b82f6;
-  --color-secondary: #10b981;
-  --color-accent: #8b5cf6;
-  --color-background: #ffffff;
-  --color-surface: #f9fafb;
-  --color-text: #111827;
-  --color-text-secondary: #6b7280;
-  --navbar-bg: rgba(255, 255, 255, 0.8);
+  /* Light theme colors - OPTIMIZED FOR CONTRAST */
+  --color-primary: #2563eb;       /* blue-600 (lebih gelap dari sebelumnya) */
+  --color-secondary: #059669;     /* emerald-600 */
+  --color-accent: #7c3aed;        /* violet-600 */
+  --color-background: #ffffff;    /* white */
+  --color-surface: #f8fafc;       /* slate-50 (lebih soft) */
+  --color-text: #1e293b;          /* slate-800 (lebih kontras) */
+  --color-text-secondary: #475569; /* slate-600 */
+  --color-text-muted: #64748b;    /* slate-500 */
+  --color-border: #e2e8f0;        /* slate-200 */
+  --color-success: #10b981;       /* emerald-500 */
+  --color-warning: #f59e0b;       /* amber-500 */
+  --color-error: #ef4444;         /* red-500 */
+  --navbar-bg: rgba(255, 255, 255, 0.9);
   --navbar-blur: 12px;
 }
 
-/* Dark theme variables */
+/* PERBAIKAN: Dark theme dengan kontras yang lebih baik */
 .dark {
-  --color-primary: #60a5fa;
-  --color-secondary: #34d399;
-  --color-accent: #a78bfa;
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-text: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --navbar-bg: rgba(15, 23, 42, 0.8);
+  --color-primary: #3b82f6;       /* blue-500 (lebih terang) */
+  --color-secondary: #10b981;     /* emerald-500 */
+  --color-accent: #8b5cf6;        /* violet-500 */
+  --color-background: #0f172a;    /* slate-900 */
+  --color-surface: #1e293b;       /* slate-800 */
+  --color-text: #f1f5f9;          /* slate-100 (lebih terang untuk kontras) */
+  --color-text-secondary: #cbd5e1; /* slate-300 */
+  --color-text-muted: #94a3b8;    /* slate-400 */
+  --color-border: #334155;        /* slate-700 */
+  --color-success: #34d399;       /* emerald-400 */
+  --color-warning: #fbbf24;       /* amber-400 */
+  --color-error: #f87171;         /* red-400 */
+  --navbar-bg: rgba(15, 23, 42, 0.95);
 }
 
-/* Base styles */
+/* ===== Base styles ===== */
 * {
   margin: 0;
   padding: 0;
@@ -46,13 +62,26 @@ html {
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--color-background);
-  color: var(--color-text);
-  /* Optimized transition: Hanya transisi warna, bukan layout */
+  color: var(--color-text); /* PERBAIKAN: Gunakan variable untuk kontras */
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+  line-height: 1.6;
 }
 
-/* Custom scrollbar */
+/* PERBAIKAN: Text contrast utilities */
+.text-high-contrast {
+  color: var(--color-text) !important;
+}
+
+.text-medium-contrast {
+  color: var(--color-text-secondary) !important;
+}
+
+.text-low-contrast {
+  color: var(--color-text-muted) !important;
+}
+
+/* ===== Custom scrollbar dengan theme colors ===== */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -60,6 +89,10 @@ body {
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -71,13 +104,18 @@ body {
   background: var(--color-secondary);
 }
 
-/* Selection color */
+/* ===== Selection color ===== */
 ::selection {
   background-color: var(--color-primary);
   color: white;
 }
 
-/* Focus styles */
+.dark ::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* ===== Focus styles untuk aksesibilitas ===== */
 *:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -87,17 +125,49 @@ body {
   outline: none;
 }
 
-/* Smooth transitions - OPTIMIZED */
-/* Mengganti 'all' dengan properti spesifik agar ringan */
+.dark *:focus {
+  outline-color: var(--color-accent);
+}
+
+/* ===== Smooth transitions ===== */
 a, button {
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
-input, textarea {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+input, textarea, select {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-/* Utility classes */
+/* ===== Utility classes untuk colors ===== */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+/* ===== Gradient utilities ===== */
 .text-gradient {
   background-clip: text;
   -webkit-background-clip: text;
@@ -112,7 +182,16 @@ input, textarea {
   background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
 }
 
-/* Animations */
+/* PERBAIKAN: Gradients untuk dark mode */
+.dark .bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary), #a78bfa);
+}
+
+.dark .bg-gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary), #a78bfa);
+}
+
+/* ===== Animations ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -154,7 +233,13 @@ input, textarea {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Glass effect utilities */
+/* PERBAIKAN: Animation untuk dark mode */
+.dark .animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+/* ===== Glass effect utilities ===== */
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -175,18 +260,71 @@ input, textarea {
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* Dihapus: blur-2xl (24px) karena terlalu berat */
+/* PERBAIKAN: Glass effect dengan kontras yang lebih baik */
+.glass-text {
+  color: var(--color-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
 
-/* Responsive typography */
+.dark .glass-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Border utilities dengan theme colors ===== */
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.border-secondary {
+  border-color: var(--color-secondary);
+}
+
+/* ===== Responsive typography ===== */
 @media (max-width: 640px) {
   html {
-    font-size: 14px;
+    font-size: 15px; /* Sedikit lebih besar untuk mobile readability */
+  }
+  
+  /* PERBAIKAN: Text size untuk mobile dengan kontras yang baik */
+  .mobile-text-lg {
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+  
+  .mobile-text-base {
+    font-size: 1rem;
+    line-height: 1.6;
   }
 }
 
-/* Print styles */
+/* PERBAIKAN: High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-text: #000000;
+    --color-text-secondary: #333333;
+    --color-background: #ffffff;
+  }
+  
+  .dark {
+    --color-text: #ffffff;
+    --color-text-secondary: #cccccc;
+    --color-background: #000000;
+  }
+}
+
+/* ===== Print styles ===== */
 @media print {
   .no-print {
     display: none !important;
   }
-}
+  
+  /* PERBAIKAN: Pastikan text hitam untuk printing */
+  body {
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+  }
