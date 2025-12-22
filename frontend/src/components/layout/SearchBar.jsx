@@ -136,28 +136,20 @@ const SearchBar = ({ onClose }) => {
   const showPopularSearches = popularSearches.length > 0 && !query;
 
   return (
-    /* TAMBAHAN PEMBUNGKUS UNTUK FIX LAYOUT BERANTAKAN */
-    <div className="fixed inset-0 z-[999] flex items-start justify-center pt-20 px-4">
-      {/* Overlay hitam transparan */}
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+    /* PERBAIKAN: Menggunakan .glass-overlay dari glass.css Anda */
+    <div className="fixed inset-0 z-[999] flex items-start justify-center pt-16 sm:pt-24 px-4 glass-overlay">
+      {/* Click outside area */}
+      <div className="absolute inset-0" onClick={onClose} />
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.2 }}
         className="relative w-full max-w-2xl"
       >
-        <div 
-          className="relative rounded-xl overflow-hidden"
-          style={{
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+        {/* PERBAIKAN: Menggunakan .glass-card dari glass.css Anda agar sinkron */}
+        <div className="overflow-hidden shadow-2xl glass-card dark:glass-card-dark">
           {/* Search Input - KODE ASLI 100% */}
           <div className="flex items-center p-4 border-b border-gray-100 dark:border-gray-800">
             <HiSearch className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
@@ -345,14 +337,14 @@ const SearchBar = ({ onClose }) => {
             )}
           </AnimatePresence>
           
-          {/* KODE ASLI 100% */}
+          {/* Search Button - KODE ASLI 100% */}
           <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={() => handleSearch()}
               disabled={!query.trim()}
               className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
                 query.trim()
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               }`}
             >
