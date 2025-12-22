@@ -4,6 +4,7 @@
  * 1. HAPUS CART ICON (sesuai permintaan)
  * 2. NOTIFIKASI HANYA SAAT USER LOGIN
  * 3. TAMBAH AUTH STATE MANAGEMENT
+ * 4. THEMETOGGLE TANPA PROPS (menggunakan Context)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -37,7 +38,8 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Custom hooks untuk data fetching
-  const { theme, toggleTheme } = useTheme();
+  // PERBAIKAN: Tidak perlu destructure theme dan toggleTheme di sini
+  // karena ThemeToggle sekarang menggunakan Context langsung
   const navData = useNavigation('header') || {}; 
   const { navigationData, loading: navLoading } = navData;
   
@@ -48,6 +50,15 @@ const Navbar = () => {
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     setIsAuthenticated(!!token);
+    
+    // Listen untuk auth state changes dari UserMenu
+    const handleAuthChange = () => {
+      const newToken = localStorage.getItem('auth_token');
+      setIsAuthenticated(!!newToken);
+    };
+    
+    window.addEventListener('authStateChanged', handleAuthChange);
+    return () => window.removeEventListener('authStateChanged', handleAuthChange);
   }, []);
   
   // Effect untuk handle scroll behavior
@@ -248,8 +259,8 @@ const Navbar = () => {
               {/* PERBAIKAN: CART ICON DIHAPUS SESUAI PERMINTAAN */}
               {/* Cart icon telah dihapus */}
               
-              {/* Theme Toggle */}
-              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              {/* PERBAIKAN: ThemeToggle TANPA PROPS (menggunakan Context) */}
+              <ThemeToggle />
               
               {/* User Menu */}
               <div className="relative">
