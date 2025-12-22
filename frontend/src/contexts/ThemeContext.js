@@ -61,7 +61,7 @@ export const ThemeProvider = ({ children }) => {
     // Update localStorage
     localStorage.setItem('theme', newTheme);
     
-    // Update isDark state
+    // Update isDark state - PERBAIKAN: Ini yang memicu re-render
     setIsDark(effectiveTheme === 'dark');
     
     // Dispatch custom event untuk notify components lain
@@ -99,17 +99,19 @@ export const ThemeProvider = ({ children }) => {
     const nextIndex = (currentIndex + 1) % themes.length;
     const nextTheme = themes[nextIndex];
     
+    console.log(`Toggling theme: ${theme} → ${nextTheme}`);
     setTheme(nextTheme);
   };
 
   // Set theme langsung
   const setThemeDirect = (newTheme) => {
     if (['light', 'dark', 'system'].includes(newTheme)) {
+      console.log(`Setting theme directly to: ${newTheme}`);
       setTheme(newTheme);
     }
   };
 
-  // Context value
+  // Context value - PERBAIKAN: Pastikan ini object yang sama reference-nya
   const value = {
     theme,
     isDark,
