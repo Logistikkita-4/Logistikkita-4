@@ -5,6 +5,7 @@
  * 2. Text colors yang lebih readable di dark mode
  * 3. Tambah performance optimizations untuk mobile
  * 4. Optimasi scroll performance
+ * 5. FIX Z-INDEX untuk konten utama (NEW)
  */
 
 @tailwind base;
@@ -72,6 +73,19 @@ body {
   line-height: 1.6;
   /* PERBAIKAN: Optimasi performance */
   text-rendering: optimizeLegibility;
+}
+
+/* ===== PERBAIKAN: Z-INDEX FIX UNTUK KONTEN UTAMA ===== */
+/* Pastikan konten utama tidak muncul di atas mobile menu */
+main, .content-wrapper, [class*="page-"], [class*="Page"], 
+section, article, .container, .mx-auto {
+  position: relative;
+  z-index: 1 !important; /* Lebih rendah dari mobile menu (z-70) */
+}
+
+/* Page sections khusus */
+.HomePage, .AboutPage, .ContactPage, .MaintenancePage {
+  z-index: 1 !important;
 }
 
 /* PERBAIKAN: Text contrast utilities */
@@ -325,6 +339,11 @@ input, textarea, select {
   .backdrop-blur-xl {
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  /* PERBAIKAN: Z-index fix khusus mobile */
+  .mobile-menu-open body {
+    overflow: hidden !important;
   }
   
   /* PERBAIKAN: Non-aktifkan animasi kompleks di mobile jika prefer reduced motion */
