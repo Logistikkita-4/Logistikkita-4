@@ -1,4 +1,3 @@
-// frontend/src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
@@ -7,8 +6,9 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import MaintenancePage from './pages/MaintenancePage';
 
-// Import styles
-import './styles/globals.css';
+// PERBAIKAN DI SINI:
+// Di struktur direktori nama filenya 'global.css' (tanpa s), bukan 'globals.css'
+import './styles/global.css'; 
 import './styles/glass.css';
 
 function App() {
@@ -21,7 +21,6 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/maintenance" element={<MaintenancePage />} />
           <Route path="/simulasi-harga" element={<MaintenancePage />} />
-          {/* Tambahkan routes lainnya sesuai kebutuhan */}
         </Routes>
       </Layout>
     </Router>
