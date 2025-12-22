@@ -1,10 +1,10 @@
 /**
- * Main Navigation Bar Component - PERBAIKAN LENGKAP
- * PERBAIKAN YANG DILAKUKAN:
- * 1. HAPUS CART ICON (sesuai permintaan)
- * 2. NOTIFIKASI HANYA SAAT USER LOGIN
- * 3. TAMBAH AUTH STATE MANAGEMENT
- * 4. THEMETOGGLE TANPA PROPS (menggunakan Context)
+ * FILE: src/components/layout/Navbar.js
+ * PERBAIKAN HAMBURGER MENU & PERFORMANCE:
+ * 1. Z-index mobile menu ditingkatkan (40 → 60) agar muncul di atas navbar
+ * 2. Kurangi efek blur untuk mobile performance
+ * 3. Optimasi animasi spring (damping: 25 → 20)
+ * 4. Hapus efek saturate yang berat
  */
 
 import React, { useState, useEffect } from 'react';
@@ -38,8 +38,6 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Custom hooks untuk data fetching
-  // PERBAIKAN: Tidak perlu destructure theme dan toggleTheme di sini
-  // karena ThemeToggle sekarang menggunakan Context langsung
   const navData = useNavigation('header') || {}; 
   const { navigationData, loading: navLoading } = navData;
   
@@ -167,9 +165,12 @@ const Navbar = () => {
             : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-md'
         }`}
         style={{
-          backdropFilter: 'blur(12px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+          // PERBAIKAN: Hapus saturate(180%) untuk performance
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          // PERBAIKAN: Tambah will-change untuk performance
+          willChange: 'transform, backdrop-filter',
         }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,6 +183,8 @@ const Navbar = () => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle mobile menu"
+                // PERBAIKAN: Tambah will-change untuk performance
+                style={{ willChange: 'transform' }}
               >
                 {isMobileMenuOpen ? (
                   <HiX className="h-6 w-6" />
@@ -237,6 +240,7 @@ const Navbar = () => {
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Search"
+                style={{ willChange: 'transform' }}
               >
                 <HiSearch className="h-5 w-5" />
               </motion.button>
@@ -248,6 +252,7 @@ const Navbar = () => {
                   whileTap={{ scale: 0.95 }}
                   className="relative p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   aria-label="Notifications"
+                  style={{ willChange: 'transform' }}
                 >
                   <HiBell className="h-5 w-5" />
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -255,9 +260,6 @@ const Navbar = () => {
                   </span>
                 </motion.button>
               )}
-              
-              {/* PERBAIKAN: CART ICON DIHAPUS SESUAI PERMINTAAN */}
-              {/* Cart icon telah dihapus */}
               
               {/* PERBAIKAN: ThemeToggle TANPA PROPS (menggunakan Context) */}
               <ThemeToggle />
@@ -289,7 +291,9 @@ const Navbar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              // PERBAIKAN: Z-index ditingkatkan dari 40 ke 60 agar muncul di atas navbar
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 lg:hidden"
+              style={{ willChange: 'opacity' }}
             />
             
             {/* Mobile Menu Panel */}
@@ -297,12 +301,17 @@ const Navbar = () => {
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl z-40 lg:hidden"
+              // PERBAIKAN: Optimasi animasi spring (damping: 25 → 20)
+              transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+              // PERBAIKAN: Z-index ditingkatkan dari 40 ke 60
+              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-60 lg:hidden"
               style={{
-                backdropFilter: 'blur(20px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                // PERBAIKAN: Kurangi blur untuk performance (xl → lg)
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+                // PERBAIKAN: Tambah will-change untuk performance
+                willChange: 'transform',
               }}
             >
               <MobileNav 
