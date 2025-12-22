@@ -4,6 +4,9 @@
  * 1. Pastikan theme apply dengan benar
  * 2. Tambah CSS variables untuk kontras yang lebih baik
  * 3. Fix system theme detection
+ * 
+ * NOTE: File ini mungkin tidak digunakan lagi karena sudah ada ThemeContext
+ * Simpan sebagai backup atau hapus jika semua komponen sudah pake ThemeContext
  */
 
 import { useState, useEffect } from 'react';
