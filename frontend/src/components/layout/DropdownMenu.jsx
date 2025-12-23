@@ -1,6 +1,6 @@
 /**
  * Dropdown Menu Component - PERBAIKAN Z-INDEX
- * PERBAIKAN: Z-index ditingkatkan dari 50 ke 60 agar di atas navbar
+ * PERBAIKAN: Z-index ditingkatkan dari 60 ke 100 agar di atas semua
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -27,8 +27,8 @@ const DropdownMenu = ({ isOpen, items, primaryColor, onClose }) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      // PERBAIKAN: Z-index ditingkatkan dari 50 ke 60
-      className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 z-[60]"
+      // PERBAIKAN: Z-index ditingkatkan dari 60 ke 100
+      className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 z-[100]"
     >
       {/* Arrow indicator */}
       <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white dark:bg-gray-800 rotate-45 border-t border-l border-gray-200 dark:border-gray-700"></div>
