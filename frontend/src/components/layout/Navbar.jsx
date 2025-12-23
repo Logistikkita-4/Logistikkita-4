@@ -311,8 +311,8 @@ const Navbar = () => {
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-                // PERBAIKAN: Tambah will-change untuk performance
-                will-change: 'transform',
+                // PERBAIKAN: Tambah willChange untuk performance
+                willChange: 'transform',
               }}
             >
               <MobileNav 
