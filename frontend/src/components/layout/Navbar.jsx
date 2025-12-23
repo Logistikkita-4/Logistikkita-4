@@ -1,6 +1,6 @@
 /**
  * FILE: src/components/layout/Navbar.js
- * FIX: Menu tidak muncul setelah update
+ * FIX: Menu tidak muncul karena hook loading stuck
  */
 
 import React, { useState, useEffect } from 'react';
@@ -32,12 +32,21 @@ const Navbar = () => {
   // PERBAIKAN: Tambah state authentication sederhana
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  // Custom hooks untuk data fetching
+  // Custom hooks untuk data fetching - TAPI KITA BYPASS LOADING
   const navData = useNavigation('header') || {}; 
   const { navigationData, loading: navLoading } = navData;
   
   const configData = useSiteConfig() || {};
   const { siteSettings, loading: settingsLoading } = configData;
+  
+  // DEBUG: Cek status loading
+  useEffect(() => {
+    console.log('🔍 NAVBAR DEBUG:');
+    console.log('navLoading:', navLoading);
+    console.log('settingsLoading:', settingsLoading);
+    console.log('navigationData:', navigationData);
+    console.log('siteSettings:', siteSettings);
+  }, [navLoading, settingsLoading, navigationData, siteSettings]);
   
   // PERBAIKAN: Cek authentication status saat component mount
   useEffect(() => {
@@ -89,7 +98,7 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
   
-  // FIX: Menu data - pastikan selalu ada fallback
+  // FIX: Menu data - HARUS hardcoded karena API mungkin tidak tersedia
   const menuItems = [
     {
       id: 1,
@@ -157,26 +166,13 @@ const Navbar = () => {
     }
   ];
   
-  // FIX: Hapus loading state check sementara untuk test
-  // Site branding dari API atau fallback
+  // FIX: Site branding - gunakan data dari hook JIKA ADA, fallback jika tidak
   const siteName = siteSettings?.site_name?.value || 'LOGISTIK KITA';
   const logoUrl = siteSettings?.site_logo?.value || '';
   const primaryColor = siteSettings?.primary_color?.value || '#3B82F6';
   
-  // FIX: Temporary - selalu render, tidak tunggu loading
-  // if (navLoading || settingsLoading) {
-  //   return (
-  //     <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
-  //       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-  //         <div className="animate-pulse h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-  //         <div className="flex items-center space-x-4">
-  //           <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-  //           <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-  //         </div>
-  //       </div>
-  //     </nav>
-  //   );
-  // }
+  // FIX: Hapus loading state blocking - render selalu, tapi bisa show loading jika mau
+  // Kita akan render navbar langsung, tidak tunggu API
   
   return (
     <>
@@ -245,12 +241,21 @@ const Navbar = () => {
               </div>
             </div>
             
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - TAMPILKAN MESKI LOADING */}
             <div className="hidden lg:flex items-center justify-center flex-1">
-              <DesktopNav 
-                menuItems={menuItems} 
-                primaryColor={primaryColor}
-              />
+              {navLoading ? (
+                // Loading skeleton untuk desktop nav
+                <div className="flex items-center space-x-4">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ) : (
+                <DesktopNav 
+                  menuItems={menuItems} 
+                  primaryColor={primaryColor}
+                />
+              )}
             </div>
             
             {/* Right Side Actions */}
@@ -332,12 +337,28 @@ const Navbar = () => {
                 willChange: 'transform',
               }}
             >
-              <MobileNav 
-                menuItems={menuItems}
-                onClose={() => setIsMobileMenuOpen(false)}
-                siteName={siteName}
-                logoUrl={logoUrl}
-              />
+              {navLoading ? (
+                // Loading skeleton untuk mobile nav
+                <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+                  <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                    <div className="animate-pulse h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="flex-1 py-2 space-y-2">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="p-4">
+                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <MobileNav 
+                  menuItems={menuItems}
+                  onClose={() => setIsMobileMenuOpen(false)}
+                  siteName={siteName}
+                  logoUrl={logoUrl}
+                />
+              )}
             </motion.div>
           </>
         )}
