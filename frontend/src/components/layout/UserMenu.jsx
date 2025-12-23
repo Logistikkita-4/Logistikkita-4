@@ -91,7 +91,7 @@ const UserMenu = ({ isOpen, onToggle, onClose }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             // PERBAIKAN: Z-index ditingkatkan
-            className="absolute right-0 mt-3 w-72 z-[60] px-2 sm:px-0"
+            className="absolute right-0 mt-3 w-72 z-[100] px-2 sm:px-0"
           >
             {/* Menu Container */}
             <div className="rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 backdrop-blur-xl">
