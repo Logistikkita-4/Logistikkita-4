@@ -5,12 +5,11 @@
  * 2. Kurangi efek blur untuk mobile performance
  * 3. Optimasi animasi spring (damping: 25 → 20)
  * 4. Hapus efek saturate yang berat
+ * 5. UPDATE: Struktur menu baru sesuai request
  */
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// PERBAIKAN: Hapus import useTheme jika ada
-// import { useTheme } from '../../hooks/useTheme'; // <-- HAPUS BARIS INI JIKA ADA
 import { useNavigation } from '../../hooks/useNavigation';
 import { useSiteConfig } from '../../hooks/useSiteConfig';
 import DesktopNav from './DesktopNav';
@@ -95,7 +94,7 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
   
-  // Navigation data dari API atau fallback default
+  // UPDATE: Navigation data dengan struktur menu baru
   const menuItems = navigationData?.items || [
     {
       id: 1,
@@ -110,26 +109,56 @@ const Navbar = () => {
       url: '#',
       icon: 'Truck',
       children: [
-        { id: 21, title: 'Kapasitas Armada', url: '/maintenance' },
+        { id: 21, title: 'Cek Kapasitas Armada', url: '/maintenance' },
         { id: 22, title: 'Jangkauan Pengiriman', url: '/maintenance' },
         { id: 23, title: 'Prosedur Keamanan', url: '/maintenance' },
-        { id: 24, title: 'Simulasi Harga Estimasi', url: '/simulasi-harga' },
+        { id: 24, title: 'Cek Harga Estimasi', url: '/maintenance' },
         { id: 25, title: 'Jenis Layanan', url: '/maintenance' },
       ]
     },
     {
-        id: 3,
-        title: 'Tentang Kami',
-        url: '/about',
-        icon: 'Info',
-        children: []
+      id: 3,
+      title: 'Galeri & Portofolio',
+      url: '#',
+      icon: 'Photograph',
+      children: [
+        { id: 31, title: 'Dokumentasi Pengiriman', url: '/maintenance' },
+        { id: 32, title: 'Kisah Sukses Lokal', url: '/maintenance' },
+        { id: 33, title: 'Testimoni Klien', url: '/maintenance' },
+      ]
     },
     {
-        id: 4,
-        title: 'Kontak',
-        url: '/contact',
-        icon: 'Phone',
-        children: []
+      id: 4,
+      title: 'Tentang Kita',
+      url: '#',
+      icon: 'InformationCircle',
+      children: [
+        { id: 41, title: 'Visi, Misi, & Nilai', url: '/maintenance' },
+        { id: 42, title: 'Profil & Legalitas', url: '/maintenance' },
+        { id: 43, title: 'Penanganan Risiko', url: '/maintenance' },
+      ]
+    },
+    {
+      id: 5,
+      title: 'Hubungi Kita',
+      url: '#',
+      icon: 'Phone',
+      children: [
+        { id: 51, title: 'Lacak Resi (Tracking)', url: '/maintenance' },
+        { id: 52, title: 'Formulir RFQ', url: '/maintenance' },
+        { id: 53, title: 'Informasi Kontak', url: '/maintenance' },
+        { id: 54, title: 'Lokasi Kantor', url: '/maintenance' },
+      ]
+    },
+    {
+      id: 6,
+      title: 'Blog / Berita',
+      url: '#',
+      icon: 'Newspaper',
+      children: [
+        { id: 61, title: 'Berita Terbaru', url: '/maintenance' },
+        { id: 62, title: 'Tips Logistik', url: '/maintenance' },
+      ]
     }
   ];
   
@@ -311,7 +340,7 @@ const Navbar = () => {
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-                // PERBAIKAN: Tambah willChange untuk performance
+                // PERBAIKAN: Tambah will-change untuk performance
                 willChange: 'transform',
               }}
             >
