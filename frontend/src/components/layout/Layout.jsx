@@ -1,21 +1,22 @@
 /**
  * Main Layout Component yang wrap seluruh aplikasi
+ * PERBAIKAN: Gunakan ThemeContext bukan useTheme hook
  * Features:
  * - Navbar di atas
  * - Main content area
  * - Footer di bawah
- * - Theme provider
- * - Config provider
  */
 
 import React from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { useTheme } from '../../hooks/useTheme';
+// PERBAIKAN: Gunakan useThemeContext dari ThemeContext
+import { useThemeContext } from '../../contexts/ThemeContext';
 import { useSiteConfig } from '../../hooks/useSiteConfig';
 
 const Layout = ({ children }) => {
-  const { theme, isDark } = useTheme();
+  // PERBAIKAN: Ganti useTheme() dengan useThemeContext()
+  const { theme, isDark } = useThemeContext();
   const { siteSettings } = useSiteConfig();
 
   return (
