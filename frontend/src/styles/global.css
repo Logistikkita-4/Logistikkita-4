@@ -5,7 +5,7 @@
  * 2. Text colors yang lebih readable di dark mode
  * 3. Tambah performance optimizations untuk mobile
  * 4. Optimasi scroll performance
- * 5. FIX Z-INDEX untuk konten utama (NEW)
+ * 5. FIX Z-INDEX untuk konten utama (NEW SECTION)
  */
 
 @tailwind base;
@@ -78,15 +78,37 @@ body {
 /* ===== PERBAIKAN: Z-INDEX FIX UNTUK KONTEN UTAMA ===== */
 /* Pastikan konten utama tidak muncul di atas mobile menu */
 main, .content-wrapper, [class*="page-"], [class*="Page"], 
-section, article, .container, .mx-auto {
+section, article, .container, .mx-auto,
+.HomePage, .AboutPage, .ContactPage, .MaintenancePage,
+div[class*="container"]:not(.fixed):not(.absolute):not(.sticky),
+.content, .page-content, .app-content,
+.page-wrapper, .page-container,
+.text-content, .page-text, .content-text {
   position: relative;
-  z-index: 1 !important; /* Lebih rendah dari mobile menu (z-70) */
+  z-index: 1 !important; /* Lebih rendah dari mobile menu (z-[999]) */
 }
 
-/* Page sections khusus */
-.HomePage, .AboutPage, .ContactPage, .MaintenancePage {
+/* PERBAIKAN: Fix untuk semua halaman */
+section:not(.fixed):not(.absolute):not(.sticky) {
   z-index: 1 !important;
 }
+
+/* PERBAIKAN: Pastikan glass effects tidak overlap menu */
+.glass, .glass-card, .glass-overlay {
+  z-index: auto !important;
+}
+
+/* PERBAIKAN: Back to top button di bawah mobile menu */
+.fixed.bottom-6 {
+  z-index: 40 !important; /* Tetap di bawah mobile menu */
+}
+
+/* PERBAIKAN: Debug border untuk melihat overlap (optional, bisa dihapus setelah testing) */
+/*
+.debug-border * {
+  outline: 1px solid rgba(255,0,0,0.1) !important;
+}
+*/
 
 /* PERBAIKAN: Text contrast utilities */
 .text-high-contrast {
@@ -339,11 +361,6 @@ input, textarea, select {
   .backdrop-blur-xl {
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
-  }
-  
-  /* PERBAIKAN: Z-index fix khusus mobile */
-  .mobile-menu-open body {
-    overflow: hidden !important;
   }
   
   /* PERBAIKAN: Non-aktifkan animasi kompleks di mobile jika prefer reduced motion */
