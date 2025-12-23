@@ -1,11 +1,6 @@
 /**
  * FILE: src/components/layout/Navbar.js
- * PERBAIKAN HAMBURGER MENU & PERFORMANCE:
- * 1. Z-index mobile menu ditingkatkan (60 → 999) agar muncul di atas semua elemen
- * 2. Kurangi efek blur untuk mobile performance
- * 3. Optimasi animasi spring (damping: 25 → 20)
- * 4. Hapus efek saturate yang berat
- * 5. UPDATE: Struktur menu baru sesuai request
+ * FIX: Menu tidak muncul setelah update
  */
 
 import React, { useState, useEffect } from 'react';
@@ -94,8 +89,8 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
   
-  // UPDATE: Navigation data dengan struktur menu baru
-  const menuItems = navigationData?.items || [
+  // FIX: Menu data - pastikan selalu ada fallback
+  const menuItems = [
     {
       id: 1,
       title: 'Beranda',
@@ -162,25 +157,26 @@ const Navbar = () => {
     }
   ];
   
-  // Site branding dari API
+  // FIX: Hapus loading state check sementara untuk test
+  // Site branding dari API atau fallback
   const siteName = siteSettings?.site_name?.value || 'LOGISTIK KITA';
   const logoUrl = siteSettings?.site_logo?.value || '';
   const primaryColor = siteSettings?.primary_color?.value || '#3B82F6';
   
-  // Loading state
-  if (navLoading || settingsLoading) {
-    return (
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="animate-pulse h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="flex items-center space-x-4">
-            <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-            <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  // FIX: Temporary - selalu render, tidak tunggu loading
+  // if (navLoading || settingsLoading) {
+  //   return (
+  //     <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-sm">
+  //       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+  //         <div className="animate-pulse h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+  //         <div className="flex items-center space-x-4">
+  //           <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+  //           <div className="animate-pulse h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+  //         </div>
+  //       </div>
+  //     </nav>
+  //   );
+  // }
   
   return (
     <>
@@ -195,11 +191,9 @@ const Navbar = () => {
             : 'bg-white/60 dark:bg-gray-900/60 backdrop-blur-md'
         }`}
         style={{
-          // PERBAIKAN: Hapus saturate(180%) untuk performance
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          // PERBAIKAN: Tambah will-change untuk performance
           willChange: 'transform, backdrop-filter',
         }}
       >
@@ -213,7 +207,6 @@ const Navbar = () => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle mobile menu"
-                // PERBAIKAN: Tambah will-change untuk performance
                 style={{ willChange: 'transform' }}
               >
                 {isMobileMenuOpen ? (
@@ -321,7 +314,6 @@ const Navbar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 999 agar muncul di atas semua elemen
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] lg:hidden"
               style={{ willChange: 'opacity' }}
             />
@@ -331,16 +323,12 @@ const Navbar = () => {
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              // PERBAIKAN: Optimasi animasi spring (damping: 25 → 20)
               transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 999
               className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-[999] lg:hidden overflow-y-auto"
               style={{
-                // PERBAIKAN: Kurangi blur untuk performance (xl → lg)
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
                 borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-                // PERBAIKAN: Tambah will-change untuk performance
                 willChange: 'transform',
               }}
             >
