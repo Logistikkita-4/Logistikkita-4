@@ -1,7 +1,7 @@
 /**
  * FILE: src/components/layout/Navbar.js
  * PERBAIKAN HAMBURGER MENU & PERFORMANCE:
- * 1. Z-index mobile menu ditingkatkan (60 → 70) agar muncul di atas navbar dan konten
+ * 1. Z-index mobile menu ditingkatkan (60 → 999) agar muncul di atas semua elemen
  * 2. Kurangi efek blur untuk mobile performance
  * 3. Optimasi animasi spring (damping: 25 → 20)
  * 4. Hapus efek saturate yang berat
@@ -9,7 +9,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../../hooks/useTheme';
+// PERBAIKAN: Hapus import useTheme jika ada
+// import { useTheme } from '../../hooks/useTheme'; // <-- HAPUS BARIS INI JIKA ADA
 import { useNavigation } from '../../hooks/useNavigation';
 import { useSiteConfig } from '../../hooks/useSiteConfig';
 import DesktopNav from './DesktopNav';
@@ -291,8 +292,8 @@ const Navbar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 70 agar muncul di atas semua elemen
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 lg:hidden"
+              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 999 agar muncul di atas semua elemen
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] lg:hidden"
               style={{ willChange: 'opacity' }}
             />
             
@@ -303,8 +304,8 @@ const Navbar = () => {
               exit={{ x: '-100%' }}
               // PERBAIKAN: Optimasi animasi spring (damping: 25 → 20)
               transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 70
-              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-70 lg:hidden overflow-y-auto"
+              // PERBAIKAN: Z-index ditingkatkan dari 60 ke 999
+              className="fixed inset-y-0 left-0 w-72 max-w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg z-[999] lg:hidden overflow-y-auto"
               style={{
                 // PERBAIKAN: Kurangi blur untuk performance (xl → lg)
                 backdropFilter: 'blur(12px)',
